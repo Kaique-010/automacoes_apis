@@ -2,7 +2,9 @@ import cv2
 import mediapipe as mp
 import subprocess
 import os
+import time
 
+import pyautogui
 # Inicializa os módulos do MediaPipe para detecção de mãos
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
@@ -19,14 +21,14 @@ resolution_y = 720
 camera.set(cv2.CAP_PROP_FRAME_WIDTH, resolution_x)
 camera.set(cv2.CAP_PROP_FRAME_HEIGHT, resolution_y)
 
-# Dicionário para armazenar os processos abertos
+# Dicionário para armazenar os processos a serem ou nõa abertos
 processes = {
     "notepad": None,
     "calc": None,
     "mspaint": None,
     "edge": None,
     "spotify_edge": None,
-    "iptv": None
+    "spartacus": None,
 }
 
 def find_coord_hands(img, side_inverted=True):
@@ -60,16 +62,43 @@ def finger_raised(hand):
         for fingertip in [8, 12, 16, 20]
     ]
 
+"""função de abertura dos aplicativos"""
 def start_program(name, command):
     if processes[name] is None:
         processes[name] = subprocess.Popen(command, shell=True)
 
+"""função para fechar os aplicativos"""
 def close_program(name, exe_name):
     if processes[name] is not None:
         os.system(f"TASKKILL /F /IM {exe_name}")
         processes[name] = None  # Reseta a variável para permitir abrir de novo
 
-# Loop principal
+def soma(a, b):
+        time.sleep(2)  
+        pyautogui.write(str(a))
+        time.sleep(3)
+        pyautogui.write('+')
+        time.sleep(1)
+        pyautogui.write(str(b))
+        time.sleep(1)
+        pyautogui.press('enter')
+
+
+        
+def login_spartacus(usuario, senha):
+    time.sleep(8)
+    pyautogui.write(usuario)  
+    pyautogui.press('tab')  
+    pyautogui.write(senha)  
+    pyautogui.press('tab')
+    time.sleep(4)
+    pyautogui.press('enter', 2)
+
+def escrita(text):
+    time.sleep(3)
+    pyautogui.write(text, interval=0.3)
+
+"""Loop principal"""
 while camera.isOpened():
     ret, frame = camera.read()
     frame = cv2.flip(frame, 1)
@@ -86,23 +115,27 @@ while camera.isOpened():
             break    
         elif info_finger_hand == [True, False, False, False]:  # indicador abre notepad
             start_program("notepad", "notepad")
+            escrita("Vai Tomar No Cool kkkkkkkk")
         elif info_finger_hand == [True, True, False, False]:  # indicador e médio calculadora
             start_program("calc", "calc")
+            soma(10,85)
         elif info_finger_hand == [True, True, True, False]:  # três primeiros Abreem Paint
             start_program("mspaint", "mspaint")
         elif info_finger_hand == [False, True, False, False]:  # Abrir Microsoft Edge dedo médio
             start_program("edge", "start msedge")
         elif info_finger_hand == [False, True, True, False]:  # Abrir Spotify no Edge com os dois médios
             start_program("spotify_edge", "start msedge https://open.spotify.com")
-        elif info_finger_hand == [False, False, True, False]:  # Abrir IPTV Smarters Pro no anelas
-            start_program("iptv", r'"C:\Users\SME\AppData\Local\Programs\IPTVSmartersPro\IPTVSmartersPro.exe"')
+        elif info_finger_hand == [False, False, True, False]:  # Abrir Spartacus anelas
+            start_program("spartacus", r'C:\Spartacus Gestao\rtanfegestao.exe')
+            login_spartacus('admin', 'roma3030@')
+
         elif info_finger_hand == [False, False, False, False]: 
             close_program("notepad", "notepad.exe")
             close_program("calc", "CalculatorApp.exe")
             close_program("mspaint", "mspaint.exe")
             close_program("edge", "msedge.exe")
             close_program("spotify_edge", "msedge.exe")  
-            close_program("iptv", "IPTVSmartersPro.exe") 
+            close_program("spartacus", "rtanfegestao.exe") 
 
     cv2.imshow("camera", img)
 
